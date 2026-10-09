@@ -15,7 +15,7 @@ export function registerExtract(program: Command): void {
     .description("Run ontology-constrained extraction and resolution over pending episodes")
     .option("-e, --engagement <slug>", "target engagement (defaults to current)")
     .option("--mock", "use the offline mock extractor (testing)")
-    .option("--model <model>", "override model (default OPENFDE_MODEL or claude-opus-4-8)")
+    .option("--model <model>", "override model (default: glm-5, or OPENFDE_MODEL env var)")
     .option("--json", "JSON output")
     .action(
       async (options: { engagement?: string; mock?: boolean; model?: string; json?: boolean }) => {
@@ -26,9 +26,11 @@ export function registerExtract(program: Command): void {
           if (options.mock) {
             extractor = new MockExtractor();
           } else {
-            if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
+            // 支持百炼 API: OPENFDE_API_KEY 或 ANTHROPIC_API_KEY
+            const apiKey = process.env.OPENFDE_API_KEY || process.env.ANTHROPIC_API_KEY;
+            if (!apiKey && !process.env.ANTHROPIC_AUTH_TOKEN) {
               throw new Error(
-                "ANTHROPIC_API_KEY not found. Set the key, or use --mock for the offline extractor",
+                "API key not found. Set OPENFDE_API_KEY (recommended) or ANTHROPIC_API_KEY, or use --mock for the offline extractor",
               );
             }
             extractor = new AnthropicExtractor({ model: options.model });

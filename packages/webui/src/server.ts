@@ -280,11 +280,13 @@ export interface ServeOptions {
 const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
 
 export function serve(options: ServeOptions): void {
-  const html = readFileSync(new URL("./index.html", import.meta.url), "utf8");
+  // 每次请求都重新读取HTML，避免缓存问题
+  const getHtml = () => readFileSync(new URL("./index.html", import.meta.url), "utf8");
   const host = options.host ?? "127.0.0.1";
   const share = options.share;
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+    const html = getHtml(); // 每次请求读取最新HTML
     const url = new URL(req.url ?? "/", `http://localhost:${options.port}`);
     const engagementParam = url.searchParams.get("engagement") ?? undefined;
     const isLocal = LOOPBACK.has(req.socket.remoteAddress ?? "");

@@ -1,3 +1,4 @@
+import { config } from "dotenv";
 import { Command } from "commander";
 import { registerEngagement } from "./commands/engagement.js";
 import { registerIngest } from "./commands/ingest.js";
@@ -25,6 +26,9 @@ import { registerPath } from "./commands/path.js";
 import { registerRun } from "./commands/run.js";
 import { registerFde } from "./commands/fde.js";
 import { registerWorktree } from "./commands/worktree.js";
+
+// 加载环境变量（从项目根目录的 .env 文件）
+config();
 
 const program = new Command();
 program

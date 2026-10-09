@@ -15,3 +15,20 @@ dist/
 *.log
 .DS_Store
 .gstack/
+
+# temporary test files and fixes
+fixeds/
+nul
+
+# OpenCode metadata
+.omo/
+
+# backup files
+*.backup
+*.backup*
+
+# test materials
+测试材料/
+
+# scripts output (optional - keep if scripts are production-ready)
+# scripts/

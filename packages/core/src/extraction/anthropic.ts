@@ -23,6 +23,8 @@ Rules:
 export interface AnthropicExtractorOptions {
   model?: string;
   client?: Anthropic;
+  apiKey?: string;
+  baseURL?: string;
 }
 
 export class AnthropicExtractor implements Extractor {
@@ -30,8 +32,21 @@ export class AnthropicExtractor implements Extractor {
   private model: string;
 
   constructor(options: AnthropicExtractorOptions = {}) {
-    this.client = options.client ?? new Anthropic();
-    this.model = options.model ?? process.env.OPENFDE_MODEL ?? "claude-opus-4-8";
+    // 支持百炼 API 配置
+    const apiKey = options.apiKey ?? process.env.OPENFDE_API_KEY ?? process.env.ANTHROPIC_API_KEY;
+    const baseURL = options.baseURL ?? process.env.OPENFDE_BASE_URL;
+
+    if (options.client) {
+      this.client = options.client;
+    } else {
+      this.client = new Anthropic({
+        apiKey,
+        baseURL,
+      });
+    }
+
+    // 默认使用 glm-5，可通过 OPENFDE_MODEL 环境变量覆盖
+    this.model = options.model ?? process.env.OPENFDE_MODEL ?? "glm-5";
   }
 
   async extract(episode: EpisodeInput): Promise<import("@openfde/ontology").ExtractionResult> {
