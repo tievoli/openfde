@@ -9,6 +9,7 @@ import {
   buildOntologyView,
   buildOverviewFlow,
   buildReport,
+  createEngagement,
   createPage,
   dataMapMarkdown,
   deletePage,
@@ -286,10 +287,20 @@ export function serve(options: ServeOptions): void {
   const share = options.share;
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+    const startTime = Date.now();
     const html = getHtml(); // 每次请求读取最新HTML
     const url = new URL(req.url ?? "/", `http://localhost:${options.port}`);
     const engagementParam = url.searchParams.get("engagement") ?? undefined;
     const isLocal = LOOPBACK.has(req.socket.remoteAddress ?? "");
+
+    // Log request on response finish
+    res.on("finish", () => {
+      const duration = Date.now() - startTime;
+      const timestamp = new Date().toISOString();
+      const method = req.method ?? "GET";
+      const path = url.pathname + url.search;
+      console.log(`[${timestamp}] ${method} ${path} - ${res.statusCode} (${duration}ms)`);
+    });
 
     try {
       /* ----- share surface: the ONLY routes reachable from other machines ----- */
@@ -376,6 +387,23 @@ export function serve(options: ServeOptions): void {
             /* none selected */
           }
           json(res, { current, engagements: listEngagements() });
+          return;
+        }
+        case "/api/engagement/create": {
+          // Create a new engagement
+          if (req.method !== "POST") return json(res, { error: "method not allowed" }, 405);
+          try {
+            const body = await readBody(req);
+            const name = String(body.name ?? "");
+            if (!name.trim()) return json(res, { error: "name is required" }, 400);
+            const slug = createEngagement(name);
+            console.log(`[INFO] Created engagement: ${slug}`);
+            json(res, { slug, name });
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.error(`[ERROR] Failed to create engagement: ${message}`);
+            json(res, { error: message }, 500);
+          }
           return;
         }
         case "/api/status": {
