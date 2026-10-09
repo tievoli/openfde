@@ -1,6 +1,6 @@
 @echo off
-REM OpenFDE 完整构建和启动脚本
-REM 用途: 清理缓存、重新构建并启动服务器
+REM OpenFDE Build and Serve Script
+REM Purpose: Clean cache, rebuild and start server
 
 setlocal enabledelayedexpansion
 
@@ -9,76 +9,76 @@ color 0A
 
 echo.
 echo ========================================
-echo   OpenFDE 构建和启动工具
+echo   OpenFDE Build and Serve Tool
 echo ========================================
 echo.
 
-REM 切换到项目根目录
+REM Switch to project root directory
 cd /d "%~dp0\.."
-echo 当前目录: %CD%
+echo Current directory: %CD%
 echo.
 
-REM 检查 package.json 是否存在
+REM Check if package.json exists
 if not exist "package.json" (
-    echo [错误] 未找到 package.json
-    echo 请确保脚本位于 scripts 目录下
+    echo [ERROR] package.json not found
+    echo Please ensure the script is in the scripts directory
     pause
     exit /b 1
 )
 
-REM 检查 pnpm 是否安装
+REM Check if pnpm is installed
 where pnpm >nul 2>&1
 if !errorlevel! neq 0 (
-    echo [错误] 未找到 pnpm 命令
-    echo 请先安装 pnpm: npm install -g pnpm
+    echo [ERROR] pnpm command not found
+    echo Please install pnpm first: npm install -g pnpm
     pause
     exit /b 1
 )
 
-echo 步骤 1: 终止所有 Node.js 进程...
+echo Step 1: Terminating all Node.js processes...
 taskkill /F /IM node.exe /T 2>nul
 if !errorlevel! equ 0 (
-    echo [成功] Node.js 进程已终止
+    echo [SUCCESS] Node.js processes terminated
 ) else (
-    echo [提示] 未找到运行中的 Node.js 进程
+    echo [INFO] No running Node.js processes found
 )
 timeout /t 2 >nul
 
 echo.
-echo 步骤 2: 清理缓存和构建输出...
+echo Step 2: Cleaning cache and build output...
 if exist "node_modules\.cache" (
     del /s /q node_modules\.cache 2>nul
-    echo [成功] 已清理 node_modules\.cache
+    echo [SUCCESS] Cleaned node_modules\.cache
 )
 if exist "apps\cli\dist" (
     del /s /q apps\cli\dist 2>nul
-    echo [成功] 已清理 apps\cli\dist
+    echo [SUCCESS] Cleaned apps\cli\dist
 )
 if exist "packages\core\dist" (
     del /s /q packages\core\dist 2>nul
-    echo [成功] 已清理 packages\core\dist
+    echo [SUCCESS] Cleaned packages\core\dist
 )
 timeout /t 2 >nul
 
 echo.
-echo 步骤 3: 重新构建 CLI...
+echo Step 3: Rebuilding CLI...
 call pnpm -C apps/cli build
 if !errorlevel! neq 0 (
-    echo [错误] 构建失败
+    echo [ERROR] Build failed
     pause
     exit /b 1
 )
-echo [成功] 构建完成
+echo [SUCCESS] Build completed
 timeout /t 2 >nul
 
 echo.
-echo 步骤 4: 启动服务器...
+echo Step 4: Starting server...
 echo.
-echo ✅ 服务器启动中...
-echo 📍 访问地址: http://localhost:4517
+echo [OK] Server starting...
+echo [INFO] Access URL: http://localhost:4517
 echo.
 echo ========================================
-echo   按 Ctrl+C 可以停止服务器
+echo   Press Ctrl+C to stop the server
 echo ========================================
 echo.
 

@@ -1,6 +1,6 @@
 @echo off
-REM OpenFDE 快速重启脚本
-REM 用途: 终止现有 Node.js 进程并启动服务器
+REM OpenFDE Fast Restart Script
+REM Purpose: Terminate existing Node.js processes and start server
 
 setlocal enabledelayedexpansion
 
@@ -9,40 +9,40 @@ color 0A
 
 echo.
 echo ========================================
-echo   OpenFDE 快速重启工具
+echo   OpenFDE Fast Restart Tool
 echo ========================================
 echo.
 
-REM 切换到项目根目录
+REM Switch to project root directory
 cd /d "%~dp0\.."
-echo 当前目录: %CD%
+echo Current directory: %CD%
 echo.
 
-REM 检查 package.json 是否存在
+REM Check if package.json exists
 if not exist "package.json" (
-    echo [错误] 未找到 package.json
-    echo 请确保脚本位于 scripts 目录下
+    echo [ERROR] package.json not found
+    echo Please ensure the script is in the scripts directory
     pause
     exit /b 1
 )
 
-echo 步骤 1: 终止所有 Node.js 进程...
+echo Step 1: Terminating all Node.js processes...
 taskkill /F /IM node.exe /T 2>nul
 if !errorlevel! equ 0 (
-    echo [成功] Node.js 进程已终止
+    echo [SUCCESS] Node.js processes terminated
 ) else (
-    echo [提示] 未找到运行中的 Node.js 进程
+    echo [INFO] No running Node.js processes found
 )
 timeout /t 2 >nul
 
 echo.
-echo 步骤 2: 启动服务器...
+echo Step 2: Starting server...
 echo.
-echo ✅ 服务器启动中...
-echo 📍 访问地址: http://localhost:4517
+echo [OK] Server starting...
+echo [INFO] Access URL: http://localhost:4517
 echo.
 echo ========================================
-echo   按 Ctrl+C 可以停止服务器
+echo   Press Ctrl+C to stop the server
 echo ========================================
 echo.
 
