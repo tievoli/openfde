@@ -1,21 +1,16 @@
 @echo off
-REM OpenFDE 服务器重启脚本（兼容旧版本）
-REM 建议: 使用 restart-server.bat 或 build-and-serve.bat
+REM OpenFDE 完整构建和启动脚本
+REM 用途: 清理缓存、重新构建并启动服务器
 
 setlocal enabledelayedexpansion
 
-title OpenFDE Server Restart
+title OpenFDE Build and Serve
 color 0A
 
 echo.
 echo ========================================
-echo   OpenFDE 服务器重启工具
+echo   OpenFDE 构建和启动工具
 echo ========================================
-echo.
-echo [提示] 建议使用以下脚本:
-echo   - restart-server.bat    (快速重启)
-echo   - build-and-serve.bat   (完整构建)
-echo   - dev-serve.bat         (开发模式)
 echo.
 
 REM 切换到项目根目录
@@ -31,6 +26,15 @@ if not exist "package.json" (
     exit /b 1
 )
 
+REM 检查 pnpm 是否安装
+where pnpm >nul 2>&1
+if !errorlevel! neq 0 (
+    echo [错误] 未找到 pnpm 命令
+    echo 请先安装 pnpm: npm install -g pnpm
+    pause
+    exit /b 1
+)
+
 echo 步骤 1: 终止所有 Node.js 进程...
 taskkill /F /IM node.exe /T 2>nul
 if !errorlevel! equ 0 (
@@ -41,25 +45,30 @@ if !errorlevel! equ 0 (
 timeout /t 2 >nul
 
 echo.
-echo 步骤 2: 清理缓存...
+echo 步骤 2: 清理缓存和构建输出...
 if exist "node_modules\.cache" (
     del /s /q node_modules\.cache 2>nul
-    echo [成功] 已清理缓存
+    echo [成功] 已清理 node_modules\.cache
 )
-if exist "apps\cli\dist\.cache" (
-    del /s /q apps\cli\dist\.cache 2>nul
-    echo [成功] 已清理 CLI 缓存
+if exist "apps\cli\dist" (
+    del /s /q apps\cli\dist 2>nul
+    echo [成功] 已清理 apps\cli\dist
+)
+if exist "packages\core\dist" (
+    del /s /q packages\core\dist 2>nul
+    echo [成功] 已清理 packages\core\dist
 )
 timeout /t 2 >nul
 
 echo.
-echo 步骤 3: 重新构建...
+echo 步骤 3: 重新构建 CLI...
 call pnpm -C apps/cli build
 if !errorlevel! neq 0 (
-    echo [警告] 构建失败，尝试直接运行...
-) else (
-    echo [成功] 构建完成
+    echo [错误] 构建失败
+    pause
+    exit /b 1
 )
+echo [成功] 构建完成
 timeout /t 2 >nul
 
 echo.

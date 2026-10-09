@@ -1,15 +1,15 @@
 @echo off
-REM OpenFDE 快速重启脚本
-REM 用途: 终止现有 Node.js 进程并启动服务器
+REM OpenFDE 开发模式启动脚本
+REM 用途: 启动服务器并监视文件变化（开发模式）
 
 setlocal enabledelayedexpansion
 
-title OpenFDE Fast Restart
-color 0A
+title OpenFDE Development Mode
+color 0B
 
 echo.
 echo ========================================
-echo   OpenFDE 快速重启工具
+echo   OpenFDE 开发模式
 echo ========================================
 echo.
 
@@ -26,20 +26,11 @@ if not exist "package.json" (
     exit /b 1
 )
 
-echo 步骤 1: 终止所有 Node.js 进程...
-taskkill /F /IM node.exe /T 2>nul
-if !errorlevel! equ 0 (
-    echo [成功] Node.js 进程已终止
-) else (
-    echo [提示] 未找到运行中的 Node.js 进程
-)
-timeout /t 2 >nul
-
 echo.
-echo 步骤 2: 启动服务器...
-echo.
-echo ✅ 服务器启动中...
-echo 📍 访问地址: http://localhost:4517
+echo 开发模式说明:
+echo - 使用 tsx 直接运行 TypeScript
+echo - 自动重载未实现（需手动重启）
+echo - 适用于快速开发和测试
 echo.
 echo ========================================
 echo   按 Ctrl+C 可以停止服务器
